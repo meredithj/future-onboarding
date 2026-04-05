@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future — Onboarding</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+:root {
+  --coral:#E06B50;
+  --coral-bg:rgba(224,107,80,0.08);
+  --coral-border:rgba(224,107,80,0.22);
+  --sage:#38A88C;
+  --sage-bg:rgba(56,168,140,0.08);
+  --sage-border:rgba(56,168,140,0.22);
+  --gold:#D4943C;
+  --gold-bg:rgba(212,148,60,0.08);
+  --gold-border:rgba(212,148,60,0.22);
+  --sky:#5B9EC9;
+  --text:#263040;
+  --text2:#6B7A8D;
+  --text3:#9AABBA;
+  --bg:#F7F5F2;
+  --card:rgba(255,255,255,0.82);
+  --card-border:rgba(200,195,188,0.45);
+  --radius:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'DM Sans',-apple-system,sans-serif;
+  background:#D8D4CE;
+  display:flex;justify-content:center;
+  min-height:100vh;padding:16px 0;
+  -webkit-font-smoothing:antialiased;
+}
+.phone{
+  width:375px;height:812px;border-radius:44px;
+  overflow:hidden;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,0.18);
+  background:var(--bg);
+}
+
+/* ===== Nature background ===== */
+.nature-bg{
+  position:absolute;top:0;left:0;right:0;height:280px;
+  z-index:0;overflow:hidden;
+  transition:opacity 0.8s;
+}
+.nature-bg::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255,245,230,0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(200,228,240,0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(220,235,225,0.4) 0%, transparent 60%),
+    linear-gradient(180deg,
+      #D6E8F0 0%,
+      #E0EEF2 15%,
+      #EAF0E8 30%,
+      #F0EDE4 50%,
+      #F5F0E8 70%,
+      var(--bg) 100%
+    );
+}
+/* Sun glow */
+.nature-bg::after{
+  content:'';position:absolute;
+  top:20px;left:50%;transform:translateX(-50%);
+  width:120px;height:120px;
+  background:radial-gradient(circle, rgba(255,220,170,0.5) 0%, rgba(255,200,140,0.15) 40%, transparent 70%);
+  border-radius:50%;
+  animation:breathe 6s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:0.7;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.08);}}
+
+/* Soft "tree line" horizon */
+.treeline{
+  position:absolute;bottom:0;left:0;right:0;height:40px;z-index:1;
+  background:linear-gradient(180deg, transparent 0%, var(--bg) 100%);
+}
+
+/* ===== Wheel visualization ===== */
+.wheel-wrap{
+  position:relative;width:100%;display:flex;justify-content:center;
+  padding:8px 0 4px;z-index:2;
+}
+.wheel{width:100px;height:100px;position:relative;}
+.wheel svg{width:100px;height:100px;transform:rotate(-90deg);}
+.wheel-seg{
+  fill:none;stroke-width:7;stroke-linecap:round;
+  transition:stroke 0.8s, opacity 0.8s;
+}
+.seg-bg{opacity:0.08;stroke:#9AABBA;}
+.seg-fill{stroke-dasharray:var(--dash);stroke-dashoffset:var(--dash);transition:stroke-dashoffset 0.8s cubic-bezier(0.22,1,0.36,1),stroke 0.5s;}
+.seg-fill.on{stroke-dashoffset:0;}
+.wheel-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.wheel-icon{font-size:22px;margin-bottom:2px;}
+.wheel-label{
+  font-size:8px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text3);
+  transition:color 0.5s;
+}
+.wheel-label.active{color:var(--text2);}
+
+/* Segment legend dots */
+.seg-legend{
+  display:flex;gap:12px;justify-content:center;padding:4px 0 0;
+}
+.seg-dot{
+  display:flex;align-items:center;gap:4px;
+  font-size:9px;font-weight:600;color:var(--text3);
+  transition:color 0.5s;
+}
+.seg-dot.on{color:var(--text2);}
+.seg-dot::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--c);opacity:0.25;transition:opacity 0.5s;
+}
+.seg-dot.on::before{opacity:1;}
+
+/* ===== Progress ===== */
+.progress{position:absolute;top:0;left:0;right:0;height:3px;z-index:200;background:rgba(0,0,0,0.04);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--coral),var(--gold));border-radius:0 3px 3px 0;transition:width 0.8s cubic-bezier(0.22,1,0.36,1);}
+
+/* ===== Screens ===== */
+.screen{
+  position:absolute;inset:0;padding:48px 24px 28px;
+  display:flex;flex-direction:column;
+  opacity:0;transform:translateX(40px);
+  transition:opacity 0.45s,transform 0.45s cubic-bezier(0.22,1,0.36,1);
+  pointer-events:none;z-index:10;
+  overflow-y:auto;-ms-overflow-style:none;scrollbar-width:none;
+}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{opacity:1;transform:translateX(0);pointer-events:all;}
+
+/* ===== Nav ===== */
+.nav{display:flex;align-items:center;margin-bottom:8px;min-height:36px;z-index:5;}
+.back{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--card);border:1px solid var(--card-border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.2s;color:var(--text);
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.back:hover{background:white;}
+.back svg{width:15px;height:15px;}
+.step-tag{
+  margin-left:auto;font-size:11px;font-weight:600;color:var(--text3);
+  background:var(--card);border:1px solid var(--card-border);
+  padding:4px 12px;border-radius:100px;
+}
+
+/* ===== Typography ===== */
+h1{font-size:26px;font-weight:800;color:var(--text);line-height:1.2;letter-spacing:-0.03em;margin-bottom:6px;}
+h1 .accent{color:var(--coral);}
+.sub{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:20px;}
+
+/* ===== Cards ===== */
+.card-stack{display:flex;flex-direction:column;gap:8px;}
+.sel-card{
+  background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:var(--radius);padding:16px;
+  cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;gap:12px;user-select:none;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.sel-card:hover{border-color:rgba(180,175,168,0.6);}
+.sel-card.on{border-color:var(--coral);background:var(--coral-bg);box-shadow:0 0 0 1px var(--coral-border);}
+.sel-card .ic{
+  width:42px;height:42px;border-radius:11px;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;transition:all 0.25s;
+}
+.sel-card.on .ic{background:var(--coral);box-shadow:0 3px 10px rgba(224,107,80,0.25);}
+.sel-card .t h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:1px;}
+.sel-card .t p{font-size:11px;color:var(--text2);line-height:1.4;}
+
+/* Goal 2-col */
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.goal-card{
+  background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:var(--radius);padding:14px 12px;
+  cursor:pointer;transition:all 0.25s;
+  display:flex;flex-direction:column;gap:8px;user-select:none;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.goal-card:hover{border-color:rgba(180,175,168,0.6);}
+.goal-card.on{border-color:var(--coral);background:var(--coral-bg);}
+.goal-card .gi{
+  width:36px;height:36px;border-radius:9px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.25s;
+}
+.goal-card.on .gi{background:var(--coral);}
+.goal-card .gl{font-size:12px;font-weight:700;color:var(--text);line-height:1.3;}
+
+/* ===== Priority chips (work-on-first) ===== */
+.priority-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.pri-chip{
+  padding:10px 16px;border-radius:100px;
+  background:var(--card);border:1.5px solid var(--card-border);
+  font-size:13px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all 0.2s;font-family:inherit;
+  display:flex;align-items:center;gap:6px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.pri-chip:hover{border-color:rgba(180,175,168,0.6);}
+.pri-chip.on{border-color:var(--coral);background:var(--coral-bg);color:var(--coral);}
+.pri-chip .num{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--text3);
+  transition:all 0.2s;
+}
+.pri-chip.on .num{background:var(--coral);color:white;}
+
+/* ===== Sliders ===== */
+.slider-group{display:flex;flex-direction:column;gap:18px;margin-bottom:8px;}
+.slider-item label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;
+}
+.slider-item label .sv{
+  font-size:11px;font-weight:700;color:var(--coral);
+  background:var(--coral-bg);padding:2px 10px;border-radius:20px;
+}
+.slider-item input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;
+  height:5px;border-radius:3px;background:rgba(0,0,0,0.06);outline:none;
+}
+.slider-item input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--coral);cursor:pointer;box-shadow:0 2px 8px rgba(224,107,80,0.3);
+  border:3px solid white;
+}
+
+/* ===== Connect rows ===== */
+.connect-stack{display:flex;flex-direction:column;gap:8px;}
+.con-row{
+  background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:var(--radius);padding:14px;
+  display:flex;align-items:center;gap:10px;
+  transition:all 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.con-row .ci{width:36px;height:36px;border-radius:9px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.con-row .ct{flex:1;}
+.con-row .cn{font-size:13px;font-weight:700;color:var(--text);}
+.con-row .cd{font-size:10px;color:var(--text2);margin-top:1px;}
+.con-row .acts{display:flex;gap:5px;flex-shrink:0;}
+.ab{
+  padding:7px 11px;border-radius:10px;font-size:10px;font-weight:700;
+  font-family:inherit;cursor:pointer;transition:all 0.2s;border:none;letter-spacing:0.02em;
+}
+.ab-go{background:var(--coral);color:white;}
+.ab-go:hover{background:#CB5B42;}
+.ab-order{background:var(--bg);color:var(--text);border:1px solid var(--card-border);}
+.ab-order:hover{background:#EDE9E4;}
+.ab-done{background:var(--sage);color:white;}
+.ab-ordered{background:var(--gold);color:white;}
+
+/* ===== Health history ===== */
+.hh-block{display:flex;flex-direction:column;gap:2px;}
+.hh-section-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;padding:12px 0 6px;}
+.hh-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid rgba(0,0,0,0.04);
+}
+.hh-row:last-child{border-bottom:none;}
+.hh-label{font-size:12px;font-weight:500;color:var(--text);flex:1;padding-right:8px;}
+.chip-group{display:flex;gap:4px;}
+.chip{
+  padding:5px 12px;border-radius:100px;
+  border:1px solid var(--card-border);background:var(--card);
+  font-size:10px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all 0.2s;font-family:inherit;
+}
+.chip:hover{background:white;}
+.chip.sel{border-color:var(--coral);background:var(--coral-bg);color:var(--coral);}
+
+/* ===== CTA ===== */
+.cta-area{margin-top:auto;padding-top:16px;}
+.cta{
+  width:100%;padding:16px;border-radius:16px;border:none;
+  background:var(--coral);color:white;
+  font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all 0.25s;
+  box-shadow:0 4px 18px rgba(224,107,80,0.25);
+}
+.cta:hover{background:#CB5B42;transform:translateY(-1px);}
+.cta:active{transform:translateY(0);}
+.cta:disabled{background:#D0CBC5;color:#A09A92;box-shadow:none;cursor:default;transform:none;}
+.cta-ghost{
+  width:100%;padding:14px;border-radius:16px;
+  border:1.5px solid var(--card-border);background:var(--card);
+  color:var(--text);font-size:13px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:all 0.2s;margin-top:8px;
+}
+.cta-ghost:hover{background:white;}
+
+/* ===== Concentric rings blueprint ===== */
+.rings-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0 8px;position:relative;
+}
+.rings-svg{width:220px;height:220px;}
+.ring-track{fill:none;stroke:rgba(0,0,0,0.04);stroke-width:12;}
+.ring-arc{
+  fill:none;stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:var(--circ);
+  stroke-dashoffset:var(--circ);
+  transition:stroke-dashoffset 2s cubic-bezier(0.22,1,0.36,1);
+}
+.ring-arc.go{stroke-dashoffset:var(--off);}
+.rings-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;
+}
+.rings-pct{font-size:32px;font-weight:800;color:var(--text);}
+.rings-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+
+.ring-legend{
+  display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;
+  padding:12px 0 0;
+}
+.rl-item{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:var(--text2);
+}
+.rl-dot{width:8px;height:8px;border-radius:50%;}
+
+/* Unlock prompts */
+.unlock-cards{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.unlock-card{
+  background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:var(--radius);padding:14px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.unlock-card:hover{border-color:rgba(180,175,168,0.6);}
+.unlock-card .ui{
+  width:36px;height:36px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.unlock-card .ut{flex:1;}
+.unlock-card .un{font-size:12px;font-weight:700;color:var(--text);}
+.unlock-card .ud{font-size:10px;color:var(--text2);margin-top:1px;}
+.unlock-card .ua{
+  font-size:10px;font-weight:700;color:var(--coral);
+  background:var(--coral-bg);padding:5px 10px;border-radius:8px;flex-shrink:0;
+}
+
+/* ===== Coach ===== */
+.coach-main{
+  background:var(--card);border:1.5px solid var(--coral-border);
+  border-radius:22px;padding:22px;text-align:center;
+  margin-bottom:10px;box-shadow:0 2px 12px rgba(224,107,80,0.06);
+}
+.match-tag{
+  display:inline-block;background:var(--coral);color:white;
+  font-size:9px;font-weight:700;padding:3px 10px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;
+}
+.coach-av{
+  width:72px;height:72px;border-radius:50%;margin:0 auto 12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;color:white;
+}
+.coach-nm{font-size:18px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.coach-cr{font-size:11px;color:var(--text2);margin-bottom:10px;}
+.coach-tags{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;}
+.coach-tg{font-size:10px;font-weight:600;padding:4px 10px;border-radius:100px;background:var(--coral-bg);color:var(--coral);}
+
+.alt-coaches{display:flex;gap:8px;margin-bottom:8px;}
+.alt-coach{
+  flex:1;background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:14px;padding:12px 8px;text-align:center;
+  cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.alt-coach:hover{border-color:rgba(180,175,168,0.6);}
+.alt-av{width:40px;height:40px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;}
+.alt-nm{font-size:11px;font-weight:700;color:var(--text);}
+.alt-sp{font-size:9px;color:var(--text2);margin-top:1px;}
+
+/* ===== Account ===== */
+.soc-btn{
+  width:100%;padding:14px;border-radius:16px;
+  border:1.5px solid var(--card-border);background:var(--card);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:13px;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all 0.2s;font-family:inherit;margin-bottom:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.04);
+}
+.soc-btn:hover{background:white;}
+.divider{display:flex;align-items:center;gap:12px;margin:12px 0;color:var(--text3);font-size:11px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.06);}
+.inp{
+  width:100%;padding:14px 16px;border-radius:14px;
+  border:1.5px solid var(--card-border);background:var(--card);
+  font-size:13px;font-family:inherit;color:var(--text);outline:none;
+  transition:border-color 0.2s;margin-bottom:8px;
+}
+.inp:focus{border-color:var(--coral);}
+.inp::placeholder{color:var(--text3);}
+
+/* ===== Splash ===== */
+.splash{
+  justify-content:center;align-items:center;text-align:center;
+  padding-top:80px;z-index:15;
+}
+.splash-logo{font-size:12px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3);margin-bottom:50px;}
+.splash-h{font-size:36px;font-weight:900;color:var(--text);line-height:1.1;letter-spacing:-0.04em;margin-bottom:14px;}
+.splash-h .warm{color:var(--coral);}
+.splash-p{font-size:14px;color:var(--text2);line-height:1.55;max-width:260px;margin:0 auto 40px;}
+.splash-cta{
+  width:200px;padding:16px;border-radius:100px;border:none;
+  background:var(--coral);color:white;font-size:15px;font-weight:700;
+  font-family:inherit;cursor:pointer;transition:all 0.3s;
+  box-shadow:0 6px 25px rgba(224,107,80,0.3);
+}
+.splash-cta:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(224,107,80,0.35);}
+.splash-note{font-size:11px;color:var(--text3);margin-top:14px;}
+
+/* Complete */
+.complete{justify-content:center;align-items:center;text-align:center;}
+.ns{
+  background:var(--card);border:1.5px solid var(--card-border);
+  border-radius:20px;padding:18px;width:100%;text-align:left;margin-top:20px;
+}
+.ns-title{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+.ns-row{display:flex;align-items:center;gap:10px;padding:7px 0;}
+.ns-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+.ns-text{font-size:12px;font-weight:500;color:var(--text2);}
+
+@media(max-width:400px){body{padding:0;}.phone{width:100%;border-radius:0;height:100vh;}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="nature-bg"><div class="treeline"></div></div>
+  <div class="progress"><div class="progress-fill" id="pf" style="width:0%"></div></div>
+
+  <!-- S0: Splash -->
+  <div class="screen splash active" id="s0">
+    <div class="splash-logo">Future</div>
+    <h1 class="splash-h">Look younger<br>than your<br><span class="warm">age.</span></h1>
+    <p class="splash-p">Biology-backed plans for fitness, nutrition, sleep, and longevity — guided by a real coach.</p>
+    <button class="splash-cta" onclick="go(1)">Build my plan</button>
+    <p class="splash-note">3 min &middot; No credit card</p>
+  </div>
+
+  <!-- S1: Life readiness -->
+  <div class="screen" id="s1">
+    <div class="nav"><button class="back" onclick="go(0)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">1 / 9</span></div>
+    <div class="wheel-wrap" id="w1">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <!-- Fills -->
+          <circle class="wheel-seg seg-fill" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">🔓</div><div class="wheel-label active">1 of 5</div></div>
+      </div>
+    </div>
+    <div class="seg-legend">
+      <div class="seg-dot on" style="--c:var(--coral)">Mindset</div>
+      <div class="seg-dot" style="--c:var(--sage)">Goals</div>
+      <div class="seg-dot" style="--c:var(--gold)">Habits</div>
+      <div class="seg-dot" style="--c:var(--sky)">Biology</div>
+      <div class="seg-dot" style="--c:#8B7EC8">History</div>
+    </div>
+    <h1 style="margin-top:12px;">How does life feel right now?</h1>
+    <p class="sub">This calibrates the pace and intensity of your plan.</p>
+    <div class="card-stack">
+      <div class="sel-card" onclick="pick(this,'s1')"><div class="ic">🌊</div><div class="t"><h3>Overwhelmed</h3><p>Stressed, stretched thin, need structure</p></div></div>
+      <div class="sel-card" onclick="pick(this,'s1')"><div class="ic">⚖️</div><div class="t"><h3>Managing</h3><p>Getting by, ready for gentle upgrades</p></div></div>
+      <div class="sel-card" onclick="pick(this,'s1')"><div class="ic">🚀</div><div class="t"><h3>Ready to optimize</h3><p>Stable and motivated — let's go</p></div></div>
+    </div>
+    <div class="cta-area"><button class="cta" id="c1" disabled onclick="go(2)">Continue</button></div>
+  </div>
+
+  <!-- S2: Goals -->
+  <div class="screen" id="s2">
+    <div class="nav"><button class="back" onclick="go(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">2 / 9</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sage)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">🎯</div><div class="wheel-label active">2 of 5</div></div>
+      </div>
+    </div>
+    <div class="seg-legend">
+      <div class="seg-dot on" style="--c:var(--coral)">Mindset</div>
+      <div class="seg-dot on" style="--c:var(--sage)">Goals</div>
+      <div class="seg-dot" style="--c:var(--gold)">Habits</div>
+      <div class="seg-dot" style="--c:var(--sky)">Biology</div>
+      <div class="seg-dot" style="--c:#8B7EC8">History</div>
+    </div>
+    <h1 style="margin-top:12px;">What matters most?</h1>
+    <p class="sub">Pick 1–3 priorities. Your plan focuses here first.</p>
+    <div class="goal-grid">
+      <div class="goal-card" onclick="tog(this)"><div class="gi">✨</div><div class="gl">Look younger</div></div>
+      <div class="goal-card" onclick="tog(this)"><div class="gi">💊</div><div class="gl">Stay fit on GLP-1s</div></div>
+      <div class="goal-card" onclick="tog(this)"><div class="gi">💪</div><div class="gl">Build strength</div></div>
+      <div class="goal-card" onclick="tog(this)"><div class="gi">🌙</div><div class="gl">Sleep better</div></div>
+      <div class="goal-card" onclick="tog(this)"><div class="gi">🧘</div><div class="gl">Reduce stress</div></div>
+      <div class="goal-card" onclick="tog(this)"><div class="gi">🧬</div><div class="gl">Optimize labs</div></div>
+    </div>
+    <div class="cta-area"><button class="cta" id="c2" disabled onclick="go(3)">Continue</button></div>
+  </div>
+
+  <!-- S3: Habits baseline -->
+  <div class="screen" id="s3">
+    <div class="nav"><button class="back" onclick="go(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">3 / 9</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sage)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--gold)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">📊</div><div class="wheel-label active">3 of 5</div></div>
+      </div>
+    </div>
+    <div class="seg-legend">
+      <div class="seg-dot on" style="--c:var(--coral)">Mindset</div>
+      <div class="seg-dot on" style="--c:var(--sage)">Goals</div>
+      <div class="seg-dot on" style="--c:var(--gold)">Habits</div>
+      <div class="seg-dot" style="--c:var(--sky)">Biology</div>
+      <div class="seg-dot" style="--c:#8B7EC8">History</div>
+    </div>
+    <h1 style="margin-top:12px;">Where are you today?</h1>
+    <p class="sub">How close to your ideal in each area? This sets your baseline.</p>
+    <div class="slider-group">
+      <div class="slider-item"><label>🌙 Sleep <span class="sv" id="v0">5</span></label><input type="range" min="1" max="10" value="5" oninput="document.getElementById('v0').textContent=this.value"></div>
+      <div class="slider-item"><label>🏃 Movement <span class="sv" id="v1">5</span></label><input type="range" min="1" max="10" value="5" oninput="document.getElementById('v1').textContent=this.value"></div>
+      <div class="slider-item"><label>🥗 Nutrition <span class="sv" id="v2">5</span></label><input type="range" min="1" max="10" value="5" oninput="document.getElementById('v2').textContent=this.value"></div>
+      <div class="slider-item"><label>🧠 Stress <span class="sv" id="v3">5</span></label><input type="range" min="1" max="10" value="5" oninput="document.getElementById('v3').textContent=this.value"></div>
+    </div>
+    <div class="cta-area"><button class="cta" onclick="go(4)">Continue</button></div>
+  </div>
+
+  <!-- S4: What to start on first -->
+  <div class="screen" id="s4">
+    <div class="nav"><button class="back" onclick="go(3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">4 / 9</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sage)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--gold)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">🎯</div><div class="wheel-label active">Focus</div></div>
+      </div>
+    </div>
+    <h1 style="margin-top:12px;">What do you want to start working on <span class="accent">today?</span></h1>
+    <p class="sub">Your coach will prioritize your first 2 weeks around this. Pick up to 2.</p>
+    <div class="priority-grid" id="priGrid">
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Build a workout routine</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Fix my sleep</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Clean up nutrition</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Manage stress</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Protect muscle on GLP-1</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Start supplements</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Get my labs tested</div>
+      <div class="pri-chip" onclick="togPri(this)"><span class="num"></span>Just talk to a coach</div>
+    </div>
+    <div class="cta-area"><button class="cta" id="c4" disabled onclick="go(5)">Continue</button></div>
+  </div>
+
+  <!-- S5: Biology -->
+  <div class="screen" id="s5">
+    <div class="nav"><button class="back" onclick="go(4)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">5 / 9</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sage)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--gold)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sky)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">🧬</div><div class="wheel-label active">4 of 5</div></div>
+      </div>
+    </div>
+    <div class="seg-legend">
+      <div class="seg-dot on" style="--c:var(--coral)">Mindset</div><div class="seg-dot on" style="--c:var(--sage)">Goals</div><div class="seg-dot on" style="--c:var(--gold)">Habits</div><div class="seg-dot on" style="--c:var(--sky)">Biology</div><div class="seg-dot" style="--c:#8B7EC8">History</div>
+    </div>
+    <h1 style="margin-top:12px;">Connect your biology</h1>
+    <p class="sub">Already have data? Connect it. Don't have it yet? We'll ship you a kit or book a scan.</p>
+    <div class="connect-stack">
+      <div class="con-row" id="cr0"><div class="ci">❤️</div><div class="ct"><div class="cn">Apple Health</div><div class="cd">Sleep, steps, heart rate</div></div><div class="acts"><button class="ab ab-go" onclick="doC(0)">Connect</button></div></div>
+      <div class="con-row" id="cr1"><div class="ci">🩸</div><div class="ct"><div class="cn">Blood Panel</div><div class="cd">Hormones, metabolic, lipids</div></div><div class="acts"><button class="ab ab-go" onclick="doC(1)">I have this</button><button class="ab ab-order" onclick="doO(1)">Order kit — $149</button></div></div>
+      <div class="con-row" id="cr2"><div class="ci">🦴</div><div class="ct"><div class="cn">DEXA Scan</div><div class="cd">Body fat %, muscle, bone density</div></div><div class="acts"><button class="ab ab-go" onclick="doC(2)">I have this</button><button class="ab ab-order" onclick="doO(2)">Book — $85</button></div></div>
+      <div class="con-row" id="cr3"><div class="ci">🏥</div><div class="ct"><div class="cn">Medical Records</div><div class="cd">Epic MyChart / CommonHealth</div></div><div class="acts"><button class="ab ab-go" onclick="doC(3)">Connect</button></div></div>
+      <div class="con-row" id="cr4"><div class="ci">✏️</div><div class="ct"><div class="cn">Manual Entry</div><div class="cd">Height, weight, age, basics</div></div><div class="acts"><button class="ab ab-order" onclick="doC(4)">Add</button></div></div>
+    </div>
+    <div class="cta-area"><button class="cta" onclick="go(6)">Continue</button></div>
+  </div>
+
+  <!-- S6: Health history -->
+  <div class="screen" id="s6">
+    <div class="nav"><button class="back" onclick="go(5)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">6 / 9</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel">
+        <svg viewBox="0 0 100 100">
+          <circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-48"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-96"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-144"/><circle class="wheel-seg seg-bg" cx="50" cy="50" r="38" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--coral)" style="--dash:40" stroke-dasharray="40 199"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sage)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-48"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--gold)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-96"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="var(--sky)" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-144"/>
+          <circle class="wheel-seg seg-fill on" cx="50" cy="50" r="38" stroke="#8B7EC8" style="--dash:40" stroke-dasharray="40 199" stroke-dashoffset="-192"/>
+        </svg>
+        <div class="wheel-center"><div class="wheel-icon">✅</div><div class="wheel-label active">5 of 5</div></div>
+      </div>
+    </div>
+    <h1 style="margin-top:8px;">Health history</h1>
+    <p class="sub">These directly shape your supplement, peptide, and exercise recommendations.</p>
+    <div class="hh-block">
+      <div class="hh-section-title">Family history</div>
+      <div class="hh-row"><span class="hh-label">Heart disease / stroke</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">Unsure</button></div></div>
+      <div class="hh-row"><span class="hh-label">Cancer (any type)</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">Unsure</button></div></div>
+      <div class="hh-row"><span class="hh-label">Diabetes / metabolic</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">Unsure</button></div></div>
+      <div class="hh-row"><span class="hh-label">Osteoporosis</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">Unsure</button></div></div>
+      <div class="hh-row"><span class="hh-label">Alzheimer's / Parkinson's</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">Unsure</button></div></div>
+      <div class="hh-section-title">Your health</div>
+      <div class="hh-row"><span class="hh-label">Current medications</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">None</button></div></div>
+      <div class="hh-row"><span class="hh-label">Hormonal issues</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button></div></div>
+      <div class="hh-row"><span class="hh-label">Gut / digestive issues</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button></div></div>
+      <div class="hh-row"><span class="hh-label">Joint / injury history</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button></div></div>
+      <div class="hh-row"><span class="hh-label">Mental health history</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button></div></div>
+      <div class="hh-row"><span class="hh-label">Pregnant / planning</span><div class="chip-group"><button class="chip" onclick="sc(this)">Yes</button><button class="chip" onclick="sc(this)">No</button><button class="chip" onclick="sc(this)">N/A</button></div></div>
+    </div>
+    <div class="cta-area"><button class="cta" onclick="go(7)">See my blueprint</button></div>
+  </div>
+
+  <!-- S7: Blueprint (concentric rings) -->
+  <div class="screen" id="s7">
+    <div class="nav"><button class="back" onclick="go(6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">7 / 9</span></div>
+    <h1 style="text-align:center;">Your blueprint</h1>
+    <p class="sub" style="text-align:center;">Each ring shows how personalized your plan is in that area. Fill in the gaps to unlock more.</p>
+
+    <div class="rings-wrap">
+      <svg class="rings-svg" viewBox="0 0 220 220">
+        <defs>
+          <linearGradient id="g1"><stop offset="0%" stop-color="var(--coral)"/><stop offset="100%" stop-color="#F0A060"/></linearGradient>
+          <linearGradient id="g2"><stop offset="0%" stop-color="var(--sage)"/><stop offset="100%" stop-color="#60D4B0"/></linearGradient>
+          <linearGradient id="g3"><stop offset="0%" stop-color="var(--gold)"/><stop offset="100%" stop-color="#E8C060"/></linearGradient>
+          <linearGradient id="g4"><stop offset="0%" stop-color="var(--sky)"/><stop offset="100%" stop-color="#80C0E0"/></linearGradient>
+          <linearGradient id="g5"><stop offset="0%" stop-color="#8B7EC8"/><stop offset="100%" stop-color="#B0A0E0"/></linearGradient>
+          <linearGradient id="g6"><stop offset="0%" stop-color="#C07898"/><stop offset="100%" stop-color="#E0A0B8"/></linearGradient>
+        </defs>
+        <!-- r=95 circ=597 -->
+        <circle class="ring-track" cx="110" cy="110" r="95"/>
+        <circle class="ring-arc" id="ra0" cx="110" cy="110" r="95" stroke="url(#g1)" style="--circ:597;--off:120" transform="rotate(-90 110 110)"/>
+        <!-- r=80 circ=503 -->
+        <circle class="ring-track" cx="110" cy="110" r="80"/>
+        <circle class="ring-arc" id="ra1" cx="110" cy="110" r="80" stroke="url(#g2)" style="--circ:503;--off:176" transform="rotate(-90 110 110)"/>
+        <!-- r=65 circ=408 -->
+        <circle class="ring-track" cx="110" cy="110" r="65"/>
+        <circle class="ring-arc" id="ra2" cx="110" cy="110" r="65" stroke="url(#g3)" style="--circ:408;--off:245" transform="rotate(-90 110 110)"/>
+        <!-- r=50 circ=314 -->
+        <circle class="ring-track" cx="110" cy="110" r="50"/>
+        <circle class="ring-arc" id="ra3" cx="110" cy="110" r="50" stroke="url(#g4)" style="--circ:314;--off:94" transform="rotate(-90 110 110)"/>
+        <!-- r=35 circ=220 -->
+        <circle class="ring-track" cx="110" cy="110" r="35"/>
+        <circle class="ring-arc" id="ra4" cx="110" cy="110" r="35" stroke="url(#g5)" style="--circ:220;--off:110" transform="rotate(-90 110 110)"/>
+        <!-- r=20 circ=126 -->
+        <circle class="ring-track" cx="110" cy="110" r="20"/>
+        <circle class="ring-arc" id="ra5" cx="110" cy="110" r="20" stroke="url(#g6)" style="--circ:126;--off:95" transform="rotate(-90 110 110)"/>
+      </svg>
+      <div class="rings-center"><div class="rings-pct" id="rPct">0%</div><div class="rings-lbl">Personalized</div></div>
+    </div>
+    <div class="ring-legend">
+      <div class="rl-item"><div class="rl-dot" style="background:var(--coral)"></div>Fitness 80%</div>
+      <div class="rl-item"><div class="rl-dot" style="background:var(--sage)"></div>Nutrition 65%</div>
+      <div class="rl-item"><div class="rl-dot" style="background:var(--gold)"></div>Supplements 40%</div>
+      <div class="rl-item"><div class="rl-dot" style="background:var(--sky)"></div>Sleep 70%</div>
+      <div class="rl-item"><div class="rl-dot" style="background:#8B7EC8"></div>Stress 50%</div>
+      <div class="rl-item"><div class="rl-dot" style="background:#C07898"></div>Labs 25%</div>
+    </div>
+
+    <div class="unlock-cards">
+      <div class="unlock-card" onclick="go(5)">
+        <div class="ui" style="background:var(--gold-bg)">🩸</div>
+        <div class="ut"><div class="un">Order a blood panel</div><div class="ud">Unlocks supplement + peptide recs</div></div>
+        <div class="ua">+35%</div>
+      </div>
+      <div class="unlock-card" onclick="go(5)">
+        <div class="ui" style="background:var(--sage-bg)">🦴</div>
+        <div class="ut"><div class="un">Book a DEXA scan</div><div class="ud">Unlocks body composition plan</div></div>
+        <div class="ua">+15%</div>
+      </div>
+      <div class="unlock-card">
+        <div class="ui" style="background:var(--coral-bg)">💬</div>
+        <div class="ut"><div class="un">Answer more questions</div><div class="ud">Your coach will ask on your first call</div></div>
+        <div class="ua">+10%</div>
+      </div>
+    </div>
+
+    <div class="cta-area"><button class="cta" onclick="go(8)">Meet my coach</button></div>
+  </div>
+
+  <!-- S8: Coach -->
+  <div class="screen" id="s8">
+    <div class="nav"><button class="back" onclick="go(7)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">8 / 9</span></div>
+    <h1>Your recommended coach</h1>
+    <p class="sub">Matched to your goals, history, and health profile.</p>
+    <div class="coach-main">
+      <span class="match-tag">Best match</span>
+      <div class="coach-av" style="background:linear-gradient(135deg,var(--coral),var(--gold));">DR</div>
+      <div class="coach-nm">Dr. Rachel Chen</div>
+      <div class="coach-cr">MD &middot; Board Certified Longevity Medicine</div>
+      <div class="coach-tags"><span class="coach-tg">GLP-1 Protocols</span><span class="coach-tg">Body Composition</span><span class="coach-tg">Peptides</span></div>
+    </div>
+    <p style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:6px;">Also available</p>
+    <div class="alt-coaches">
+      <div class="alt-coach"><div class="alt-av" style="background:linear-gradient(135deg,var(--sage),#2DD4A8);">JM</div><div class="alt-nm">James Miller</div><div class="alt-sp">Strength & Recovery</div></div>
+      <div class="alt-coach"><div class="alt-av" style="background:linear-gradient(135deg,#6366F1,#A78BFA);">SP</div><div class="alt-nm">Sarah Park</div><div class="alt-sp">Sleep & Stress</div></div>
+    </div>
+    <div class="cta-area">
+      <button class="cta" onclick="go(9)">Meet Dr. Chen</button>
+      <button class="cta-ghost" onclick="go(9)">Schedule intro call instead</button>
+    </div>
+  </div>
+
+  <!-- S9: Account -->
+  <div class="screen" id="s9">
+    <div class="nav"><button class="back" onclick="go(8)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button><span class="step-tag">9 / 9</span></div>
+    <h1>Lock in your blueprint</h1>
+    <p class="sub">Create your account to save your plan and coach match.</p>
+    <button class="soc-btn" onclick="go(10)"><span style="font-size:16px">🍎</span> Continue with Apple</button>
+    <button class="soc-btn" onclick="go(10)"><span style="font-size:14px;font-weight:700">G</span> Continue with Google</button>
+    <div class="divider">or</div>
+    <input class="inp" type="email" placeholder="Email address">
+    <input class="inp" type="password" placeholder="Create password">
+    <div class="cta-area">
+      <button class="cta" onclick="go(10)">Create account</button>
+      <p style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px;line-height:1.5;">By continuing you agree to Future's Terms & Privacy Policy.</p>
+    </div>
+  </div>
+
+  <!-- S10: Complete -->
+  <div class="screen complete" id="s10">
+    <div style="font-size:52px;margin-bottom:16px;">🎉</div>
+    <h1 style="text-align:center;">You're in.</h1>
+    <p class="sub" style="text-align:center;max-width:260px;">Your blueprint is live. Dr. Chen will reach out within 24 hours.</p>
+    <div class="ns">
+      <div class="ns-title">What happens next</div>
+      <div class="ns-row"><div class="ns-num" style="background:var(--coral);">1</div><div class="ns-text">Coach intro call (15 min)</div></div>
+      <div class="ns-row"><div class="ns-num" style="background:var(--gold);">2</div><div class="ns-text">Lab kit ships to your door</div></div>
+      <div class="ns-row"><div class="ns-num" style="background:var(--sage);">3</div><div class="ns-text">Full personalized plan unlocks</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let cur=0;
+function go(n){
+  const c=document.getElementById('s'+cur),nx=document.getElementById('s'+n),fwd=n>cur;
+  c.style.transform=fwd?'translateX(-30px)':'translateX(30px)';c.style.opacity='0';
+  setTimeout(()=>{c.classList.remove('active');c.style.transform='';c.style.opacity='';},450);
+  nx.style.transform=fwd?'translateX(30px)':'translateX(-30px)';nx.style.opacity='0';
+  requestAnimationFrame(()=>{nx.classList.add('active');requestAnimationFrame(()=>{nx.style.transform='translateX(0)';nx.style.opacity='1';});});
+  const p=n===0?0:n>=10?100:(n/9)*100;
+  document.getElementById('pf').style.width=p+'%';
+  cur=n;nx.scrollTop=0;
+  if(n===7)setTimeout(animRings,500);
+}
+function pick(card,sid){
+  document.querySelectorAll('#'+sid+' .sel-card').forEach(c=>c.classList.remove('on'));
+  card.classList.add('on');
+  const num=sid.replace('s','');const btn=document.getElementById('c'+num);if(btn)btn.disabled=false;
+}
+function tog(card){
+  card.classList.toggle('on');
+  document.getElementById('c2').disabled=document.querySelectorAll('#s2 .goal-card.on').length===0;
+}
+let priCount=0;
+function togPri(chip){
+  if(chip.classList.contains('on')){chip.classList.remove('on');priCount--;chip.querySelector('.num').textContent='';}
+  else if(priCount<2){priCount++;chip.classList.add('on');chip.querySelector('.num').textContent=priCount;}
+  document.getElementById('c4').disabled=priCount===0;
+  // renumber
+  let i=1;document.querySelectorAll('#priGrid .pri-chip.on').forEach(c=>{c.querySelector('.num').textContent=i++;});
+}
+function sc(chip){chip.closest('.chip-group').querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));chip.classList.add('sel');}
+function doC(i){
+  const r=document.getElementById('cr'+i);
+  r.querySelector('.acts').innerHTML='<button class="ab ab-done">✓ Connected</button>';
+  r.style.borderColor='var(--sage-border)';
+}
+function doO(i){
+  const r=document.getElementById('cr'+i);
+  r.querySelector('.acts').innerHTML='<button class="ab ab-ordered">📦 Added to plan</button>';
+  r.style.borderColor='var(--gold-border)';
+  const sub=r.querySelector('.cd');
+  if(i===1)sub.textContent='Kit ships after signup — results in 5 days';
+  if(i===2)sub.textContent="We'll book a location near you after signup";
+}
+function animRings(){
+  for(let i=0;i<6;i++) setTimeout(()=>document.getElementById('ra'+i).classList.add('go'),i*200);
+  let c=0;const tgt=55;
+  const iv=setInterval(()=>{c++;document.getElementById('rPct').textContent=c+'%';if(c>=tgt)clearInterval(iv);},40);
+}
+</script>
+</body>
+</html>
